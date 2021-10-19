@@ -14,6 +14,103 @@
 - 특정 필드의 범위를 넘어서는 검증
   - 가격 * 수량의 합은 10,000원 이상
 
+## Bean Validation
+특정 필드에 대한 검증 로직은 대부분 빈 값인지 아닌지, 특정 크기를 넘는지 아닌지와 같이 매우 일반적인 로직이다.    
+이런 검증 로직을 모든 프로젝트에 적용할 수 있게 공통화하고, 표준화 한 것이 바로 Bean Validation이다.    
+Bean Validation을 잘 활용하면, 애노테이션 하나로 검증 로직을 매우 편리하게 적용할 수 있다.    
+
+### 의존관계 추가
+~~~gradle
+implementation 'org.springframework.boot:spring-boot-starter-validation'
+~~~
+
+### Item - Bean Validation 애노테이션 적용
+~~~java
+@Data
+public class Item {
+  private Long id;
+  
+  @NotBlank
+  private String itemName;
+  
+  @NotNull
+  @Range(min = 1000, max = 1000000)
+  private Integer price;
+  
+  @NotNull
+  @Max(9999)
+  private Integer quantity;
+}
+~~~
+
+검증 애노테이션
+- @NotBlank : 빈값 + 공백만 있는 경우를 허용하지 않는다.
+- @NotNull : null 을 허용하지 않는다.
+- @Range(min = 1000, max = 1000000) : 범위 안의 값이어야 한다.
+- @Max(9999) : 최대 9999까지만 허용한다.
+
+### 스프링 MVC는 어떻게 Bean Validator를 사용?
+스프링 부트가 spring-boot-starter-validation 라이브러리를 넣으면 자동으로 Bean Validator를 인지하고 스프링에 통합한다.
+
+### 스프링 부트는 자동으로 글로벌 Validator로 등록한다.
+LocalValidatorFactoryBean 을 글로벌 Validator로 등록한다. 이 Validator는 @NotNull 같은 애노테이션을 보고 검증을 수행한다.     
+이렇게 글로벌 Validator가 적용되어 있기 때문에, @Valid ,@Validated만 적용하면 된다.    
+검증 오류가 발생하면, FieldError , ObjectError 를 생성해서 BindingResult에 담아준다.
+
+### Bean Validation - 에러 코드
+ 
+@NotBlank
+- NotBlank.item.itemName
+- NotBlank.itemName
+- NotBlank.java.lang.String
+- NotBlank 
+
+  
+@Range
+- Range.item.price
+- Range.price
+- Range.java.lang.Integer
+- Range
+
+### BeanValidation 메시지 찾는 순서
+1. 생성된 메시지 코드 순서대로 messageSource에서 메시지 찾기
+2. 애노테이션의 message 속성 사용 @NotBlank(message = "공백! {0}")
+3. 라이브러리가 제공하는 기본 값 사용 공백일 수 없습니다.
+
+### BeanValidation 사용해서 컨트롤러에서 폼 객체 검증하기
+~~~java
+@PostMapping("/add")
+public String addItem(@Validated @ModelAttribute("item") ItemSaveForm form, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+  //...
+}
+~~~
+- 도메인 객체인 Item 대신 ItemSaveform을 전달 받는다. 
+- @Validated로 검증을 수행하고, BindingResult로 검증 결과도 받는다.
+- @ModelAttribute("item") 에 item 이름을 넣는 이유는 MVC Model에 itemSaveForm이라는 이름으로 MVC Model에 담기지 말고 item이 들어가도록 하기 위함이다..
+
+### BeanValidation - HTTP 메시지 컨버터
+@Valid, @Validated는 HttpMessageConverter(@RequestBody)에도 적용할 수 있다.
+> 참고
+> @ModelAttribute 는 HTTP 요청 파라미터(URL 쿼리 스트링, POST Form)를 다룰 때 사용한다.    
+> @RequestBody 는 HTTP Body의 데이터를 객체로 변환할 때 사용한다. 주로 API JSON 요청을 다룰 때 사용한다.
+
+~~~java
+@PostMapping("/add")
+public Object addItem(@RequestBody @Validated ItemSaveForm form, BindingResult bindingResult) {
+  log.info("API 컨트롤러 호출");
+  if (bindingResult.hasErrors()) {
+    log.info("검증 오류 발생 errors={}", bindingResult);
+    return bindingResult.getAllErrors();
+  }
+  log.info("성공 로직 실행");
+  return form;
+}
+~~~
+### API의 경우 3가지 경우를 나누어 생각해야 한다.
+- 성공 요청: 성공
+- 실패 요청: JSON을 객체로 생성하는 것 자체가 실패함
+- 검증 오류 요청: JSON을 객체로 생성하는 것은 성공했고, 검증에서 실패함
+
 ## BindingResult과 FieldError, ObjectError
 ### BindingResult
 - 스프링이 제공하는 검증 오류를 보관하는 객체이다. 검증 오류가 발생하면 여기에 보관하면 된다.
