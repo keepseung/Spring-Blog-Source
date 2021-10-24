@@ -10,3 +10,4 @@ https://develop-writing.tistory.com/ 에서 제공하는 예제 code
 
 - [Message - 메세지 국제화 기능](https://github.com/keepseung/SpringBoot-Blog-Source/tree/main/message)
 - [MVC + Validation - 검증 기능](https://github.com/keepseung/SpringBoot-Blog-Source/tree/main/validation)
+- [스프링부트에서 스케쥴러 사용하기](https://github.com/keepseung/SpringBoot-Blog-Source/tree/main/scheduler)
