@@ -1,6 +1,8 @@
 package hello.exception;
 
 import hello.exception.filter.LogFilter;
+import hello.exception.handler.MyHandlerExceptionResolver;
+import hello.exception.handler.UserHandlerExceptionResolver;
 import hello.exception.interceptor.LogInterceptor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -38,9 +40,9 @@ public class WebConfig implements WebMvcConfigurer {
                 );
     }
 
-//    @Override
-//    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
-//        resolvers.add(new MyHandlerExceptionResolver());
-//        resolvers.add(new UserHandlerExceptionResolver());
-//    }
+    @Override
+    public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> resolvers) {
+        resolvers.add(new MyHandlerExceptionResolver());
+        resolvers.add(new UserHandlerExceptionResolver());
+    }
 }
