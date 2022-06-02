@@ -5,7 +5,7 @@ https://develop-writing.tistory.com/ 에서 제공하는 예제 code
 현재까지 등록된 내용
 --------------------
 
-### Spring
+## Spring
 
 - [Message - 메세지 국제화 기능](https://github.com/keepseung/SpringBoot-Blog-Source/tree/main/message)
 - [MVC + Validation - 검증 기능](https://github.com/keepseung/SpringBoot-Blog-Source/tree/main/validation)
@@ -14,3 +14,7 @@ https://develop-writing.tistory.com/ 에서 제공하는 예제 code
 - [로그인 처리하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/login)
 - [예외 처리하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/exception)
 - [타입 컨버터 사용하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/typeconverter) 
+
+
+## AWS
+- [Springboot에 AWS S3 연동 (이미지, 동영상 업로드)](https://develop-writing.tistory.com/128)
