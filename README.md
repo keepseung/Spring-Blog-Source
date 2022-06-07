@@ -17,4 +17,4 @@ https://develop-writing.tistory.com/ 에서 제공하는 예제 code
 
 
 ## AWS
-- [Springboot에 AWS S3 연동 (이미지, 동영상 업로드)](https://develop-writing.tistory.com/128)
+- [Springboot에 AWS S3 연동 (이미지, 동영상 업로드)](https://github.com/keepseung/Spring-Blog-Source/tree/main/s3uploader)
