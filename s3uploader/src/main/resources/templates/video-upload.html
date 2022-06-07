@@ -36,7 +36,7 @@
         var file = $('#video')[0].files[0];
         var formData = new FormData();
         formData.append('data', file);
-
+        let start = new Date();
         $.ajax({
             type: 'POST',
             url: '/video-upload',
@@ -45,6 +45,8 @@
             contentType: false
         }).done(function (data) {
             $('#result-video').attr("src", data);
+            let end = new Date();
+            console.log("파일 업로드 하는데 걸린 시간 : "+(end-start)+"ms")
         }).fail(function (error) {
             alert(error);
         })

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S3 멀티파트 업로드</title>
+    <style>
+        body{
+            height: 100vh; background-color: #212121; margin: 0; width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        h1,input{
+            color: rgb(202, 202, 202);
+        }
+        hr{
+            margin-top: 50px;
+            margin-bottom: 50px;
+        }
+    </style>
+</head>
+<body>
+<h1>S3 멀티파트 업로드 테스트하기 (최대 3GB)</h1>
+<input  type="file"  id="multipartInput">
+<button  id="multipartInputBtn">send file</button>
+<button id="abortUploadBtn">Abort Upload</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ==" crossorigin="anonymous"></script>
+<script>
+    document.getElementById('multipartInputBtn').addEventListener('click', async () => {
+        const multipartInput_fileInput = document.getElementById('multipartInput');
+        // const targetId = document.getElementById('tutorialId').value;
+        const file = multipartInput_fileInput.files[0];
+        const fileName = file.name;
+        const fileSize = file.size;
+
+        // 3GB가 넘어가는 파일 업로드 제한
+        if (fileSize > 3 * 1024 * 1024 * 1024) {
+            alert('The file you are trying to upload is too large. (under 3GB)');
+            return;
+        }
+
+        // localhost를 서버 IP로 변경하면 됨
+        const url = `http://localhost:8080`;
+
+        try {
+            let start = new Date();
+            // 1. Spring Boot 서버로 멀티파트 업로드 시작 요청합니다.
+            let res = await axios.post(`${url}/initiate-upload`, { fileName: fileName });
+            const uploadId = res.data.uploadId;
+            const newFilename = res.data.fileName; // 서버에서 생성한 새로운 파일명
+            console.log(res);
+
+            // 세션 스토리지에 업로드 아이디와 파일 이름을 저장합니다.
+            sessionStorage.setItem('uploadId', uploadId);
+            sessionStorage.setItem('fileName', newFilename);
+
+            // 청크 사이즈와 파일 크기를 통해 청크 개수를 설정합니다.
+            const chunkSize = 10 * 1024 * 1024; // 10MB
+            const chunkCount = Math.floor(fileSize / chunkSize) + 1;
+            console.log(`chunkCount: ${chunkCount}`);
+
+            let multiUploadArray = [];
+
+            for (let uploadCount = 1; uploadCount < chunkCount + 1; uploadCount++) {
+                // 청크 크기에 맞게 파일을 자릅니다.
+                let start = (uploadCount - 1) * chunkSize;
+                let end = uploadCount * chunkSize;
+                let fileBlob = uploadCount < chunkCount ? file.slice(start, end) : file.slice(start);
+
+                // 3. Spring Boot 서버로 Part 업로드를 위한 미리 서명된 URL 발급 바듭니다.
+                let getSignedUrlRes = await axios.post(`${url}/upload-signed-url`, {
+                    fileName: newFilename,
+                    partNumber: uploadCount,
+                    uploadId: uploadId
+                });
+
+                let preSignedUrl = getSignedUrlRes.data.preSignedUrl;
+                console.log(`preSignedUrl ${uploadCount} : ${preSignedUrl}`);
+                console.log(fileBlob);
+
+                // 3번에서 받은 미리 서명된 URL과 PUT을 사용해 AWS 서버에 청크를 업로드합니다,
+                let uploadChunck = await fetch(preSignedUrl, {
+                    method: 'PUT',
+                    body: fileBlob
+                });
+                console.log(uploadChunck);
+                // 응답 헤더에 있는 Etag와 파트 번호를 가지고 있습니다.
+                let EtagHeader = uploadChunck.headers.get('ETag').replaceAll('\"', '');
+                console.log(EtagHeader);
+                let uploadPartDetails = {
+                    awsETag: EtagHeader,
+                    partNumber: uploadCount
+                };
+
+                multiUploadArray.push(uploadPartDetails);
+            }
+
+            console.log(multiUploadArray);
+            // 6. 모든 청크 업로드가 완료되면 Spring Boot 서버로 업로드 완료 요청을 보냅니다.
+            // 업로드 아이디 뿐만 아니라 이 때 Part 번호와 이에 해당하는 Etag를 가진 'parts'를 같이 보냅니다.
+            const completeUpload = await axios.post(`${url}/complete-upload`, {
+                fileName: newFilename,
+                parts: multiUploadArray,
+                uploadId: uploadId
+            });
+            let end = new Date();
+            console.log("파일 업로드 하는데 걸린 시간 : "+(end-start)+"ms")
+            console.log(completeUpload.data, ' 업로드 완료 응답값');
+        } catch (err) {
+            console.log(err, err.stack);
+        }
+
+    });
+
+    document.getElementById('abortUploadBtn').addEventListener('click', () => {
+        const uploadId = sessionStorage.getItem('uploadId');
+        const fileName = sessionStorage.getItem('fileName');
+        console.log({ fileName: fileName, uploadId: uploadId });
+        axios
+            .post(`/abort-upload`, { fileName: fileName, uploadId: uploadId })
+            .then((r) => console.log(r.data))
+            .catch((err) => console.error(err));
+        clearInterval();
+    });
+</script>
+</body>
+</html>
