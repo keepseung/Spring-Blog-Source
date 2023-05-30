@@ -1,0 +1,4 @@
+notification:
+  slack:
+    webhook:
+      url: { YORU URL }
