@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1> Hello ABTest </h1>
+<!--
+    고객에게 보여줄 ABTest 그룹에 따른 내용
+-->
+<p th:text="${data}"></p>
+<form action="/abtest/hello" method="post">
+    <input type="hidden" name="userId" th:value="${userId}" />
+    <input type="hidden" name="orderId" value="12345"/>
+    <input type="hidden" name="amount" value="1000000"/>
+    <button type="submit">결제</button>
+</form>
+</body>
+</html>

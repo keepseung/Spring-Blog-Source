@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Function Flag</title>
+</head>
+<body>
+<h1>Hackle Function Flag</h1>
+<hr/>
+<!--
+    고객에게 기능 활성화 여부에 따라 보여줄 내용
+-->
+<div th:if="${featureOn}">
+    <h2>이미 사용 중인 기능</h2>
+    <button style="background-color: gray">기존 기능 버튼</button>
+    <h2>새로운 기능 출시!!!</h2>
+    <button style="background-color: deepskyblue">새로운 기능 버튼</button>
+</div>
+<div th:unless="${featureOn}">
+    <h2>이미 사용 중인 기능</h2>
+    <button style="background-color: gray">기존 기능 버튼</button>
+</div>
+</body>
+</html>

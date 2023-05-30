@@ -1,0 +1,6 @@
+abtest:
+  hackle:
+    sdk:
+      server:
+        key: { YOUR KEY }
+
