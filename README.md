@@ -14,6 +14,7 @@ https://develop-writing.tistory.com/ 에서 제공하는 예제 code
 - [예외 처리하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/exception)
 - [타입 컨버터 사용하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/typeconverter) 
 - [ABTest 적용하기](https://github.com/keepseung/Spring-Blog-Source/tree/main/abtest) 
+- [Slack 채널에 알림보내기](https://github.com/keepseung/Spring-Blog-Source/tree/main/slack-notification) 
 
 ## AWS
 - [Springboot에 AWS S3 연동 (이미지, 동영상 업로드)](https://github.com/keepseung/Spring-Blog-Source/tree/main/s3uploader)
